@@ -16,12 +16,6 @@ export default function RootLayout({
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter(); // Initialize useRouter
 
-  // const pathname = usePathname();
-
-  // useEffect(() => {
-  //   setTimeout(() => setLoading(false), 1000);
-  // }, []);
-
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -31,6 +25,18 @@ export default function RootLayout({
     } else {
       setLoading(false);
     }
+
+    // To show loader on route changes
+    // const handleRouteChangeStart = () => setLoading(true);
+    // const handleRouteChangeComplete = () => setLoading(false);
+
+    // router.events.on("routeChangeStart", handleRouteChangeStart);
+    // router.events.on("routeChangeComplete", handleRouteChangeComplete);
+
+    // return () => {
+    //   router.events.off("routeChangeStart", handleRouteChangeStart);
+    //   router.events.off("routeChangeComplete", handleRouteChangeComplete);
+    // };
   }, [router]);
 
   return (
