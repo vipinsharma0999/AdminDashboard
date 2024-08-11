@@ -1,23 +1,17 @@
 'use client'
 import { useMemo } from 'react';
 
-//MRT Imports
+// MRT Imports
 import {
   MaterialReactTable,
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
 
-//Material UI Imports
-import {
-  Box,
-} from '@mui/material';
+// Material UI Imports
+import { Box } from '@mui/material';
 
-//Icons Imports
-import { AccountCircle, Send } from '@mui/icons-material';
-
-//Mock Data
-// import { data } from './makeData';
+// Mock Data
 import { data } from './MakeData';
 
 export type Employee = {
@@ -29,18 +23,19 @@ export type Employee = {
   startDate: string;
   signatureCatchPhrase: string;
   avatar: string;
+  phoneNumber: string;
 };
 
 const Example = () => {
   const columns = useMemo<MRT_ColumnDef<Employee>[]>(
     () => [
       {
-        id: 'employee', //id used to define `group` column
-        header: 'Employee',  // It is the header employee
+        id: 'employee', // id used to define `group` column
+        header: 'Employee', // It is the header employee
         columns: [
           {
-            accessorFn: (row) => `${row.firstName} ${row.lastName}`, //accessorFn used to join multiple data into a single cell
-            id: 'name', //id is still required when using accessorFn instead of accessorKey
+            accessorFn: (row) => `${row.firstName} ${row.lastName}`, // accessorFn used to join multiple data into a single cell
+            id: 'name', // id is still required when using accessorFn instead of accessorKey
             header: 'Name',
             size: 250,
             Cell: ({ renderedCellValue, row }) => (
@@ -56,7 +51,7 @@ const Example = () => {
             ),
           },
           {
-            accessorKey: 'email', //accessorKey used to define `data` column. `id` gets set to accessorKey automatically
+            accessorKey: 'email', // accessorKey used to define `data` column. `id` gets set to accessorKey automatically
             enableClickToCopy: true,
             filterVariant: 'autocomplete',
             header: 'Email',
@@ -70,11 +65,11 @@ const Example = () => {
         columns: [
           {
             accessorKey: 'salary',
-            filterVariant: 'range', //if not using filter modes feature, use this instead of filterFn
+            filterVariant: 'range', // if not using filter modes feature, use this instead of filterFn
             filterFn: 'between',
             header: 'Salary',
             size: 200,
-            //custom conditional format and styling
+            // custom conditional format and styling
             Cell: ({ cell }) => (
               <Box
                 component="span"
@@ -83,7 +78,7 @@ const Example = () => {
                     cell.getValue<number>() < 50_000
                       ? theme.palette.error.dark
                       : cell.getValue<number>() >= 50_000 &&
-                          cell.getValue<number>() < 75_000
+                        cell.getValue<number>() < 75_000
                         ? theme.palette.warning.dark
                         : theme.palette.success.dark,
                   borderRadius: '0.25rem',
@@ -102,25 +97,27 @@ const Example = () => {
             ),
           },
           {
-            accessorKey: 'jobTitle', //hey a simple column for once
+            accessorKey: 'jobTitle', // simple column for job title
             header: 'Job Title',
             size: 350,
           },
-          // {
-          //   accessorFn: (row) => new Date(row.startDate), //convert to Date for sorting and filtering
-          //   id: 'startDate',
-          //   header: 'Start Date',
-          //   filterVariant: 'date',
-          //   filterFn: 'lessThan',
-          //   sortingFn: 'datetime',
-          //   Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString(), //render Date as a string
-          //   Header: ({ column }) => <em>{column.columnDef.header}</em>, //custom header markup
-          //   muiFilterTextFieldProps: {
-          //     sx: {
-          //       minWidth: '250px',
-          //     },
-          //   },
-          // },
+          {
+            accessorKey: 'phoneNumber', // accessorKey for phone number
+            header: 'Phone Number',
+            size: 250,
+            Cell: ({ cell }) => (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                }}
+              >
+                
+                <span>{cell.getValue<string>()}</span>
+              </Box>
+            ),
+          },
         ],
       },
     ],
@@ -129,7 +126,7 @@ const Example = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+    data, // data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
     enableColumnFilterModes: true,
     enableColumnOrdering: true,
     enableGrouping: true,
@@ -160,12 +157,12 @@ const Example = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//Date Picker Imports - these should just be in your Context Provider
+// Date Picker Imports - these should just be in your Context Provider
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const ExampleWithLocalizationProvider = () => (
-  //App.tsx or AppProviders file
+  // App.tsx or AppProviders file
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Example />
   </LocalizationProvider>

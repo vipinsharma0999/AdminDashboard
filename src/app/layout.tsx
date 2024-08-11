@@ -5,6 +5,7 @@ import "@/css/satoshi.css";
 import "@/css/style.css";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
+import { useRouter } from "next/navigation";
 
 export default function RootLayout({
   children,
@@ -13,12 +14,24 @@ export default function RootLayout({
 }>) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter(); // Initialize useRouter
 
   // const pathname = usePathname();
 
+  // useEffect(() => {
+  //   setTimeout(() => setLoading(false), 1000);
+  // }, []);
+
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login"); // Redirect to login page if token is not present
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
 
   return (
     <html lang="en">

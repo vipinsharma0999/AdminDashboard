@@ -45,9 +45,9 @@ const FormLayoutClient = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="FormLayout" />
+      <Breadcrumb pageName="FootFall" />
 
-      <div className="grid grid-cols-1 gap-9 sm:grid-cols-2">
+      <div className="grid">
         <div className="flex flex-col gap-9">
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
