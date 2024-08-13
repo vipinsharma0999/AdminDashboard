@@ -7,7 +7,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 
-const Sidebar = dynamic(() => import("@/components/Tables/SlotMui/TS"), {
+const Table = dynamic(() => import("@/components/Tables/SlotMui/TS"), {
   loading: () => <Loader />,
   ssr: false, // Disable SSR for this component to ensure the loader works properly
 });
@@ -34,7 +34,7 @@ const donatointable2 = () => {
               <Loader />
             ) : (
               <>
-                <Sidebar />
+                <Table />
               </>
             )}
             {/* <TableOne /> */}

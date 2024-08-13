@@ -90,10 +90,11 @@ const menuGroups = [
           // { label: "eCommerce1", route: "/" },
           // { label: "eCommerce2", route: "/forms/form-elements" },
           { label: "Account Management", route: "/admin/accountmanagement" },
-          { label: "Donation Management", route: "/admin/donationmanagement" },
+          { label: "User Management", route: "/admin/usermanagement" },
           { label: "Booking Management", route: "/admin/bookingmanagement" },
           { label: "Slot Management", route: "/admin/slotmanagement" },
-          { label: "Feedback Management", route: "/admin/feedbackmanagement" },
+          { label: "Appointments", route: "/admin/appointmentmanagement" },
+          { label: "Yajna Sanskars", route: "/admin/yajnasanskar" },
         ],
       },
       // {
@@ -316,9 +317,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
           <Link href="/">
             <Image
-              width={235}
+              width={100}
               height={20}
-              src={"/images/logo/logo.jpg"}
+              src={"/images/logo/logo3.png"}
               alt="Logo"
               priority
             />

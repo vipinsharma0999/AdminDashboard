@@ -1,14 +1,11 @@
 "use client";
 import dynamic from "next/dynamic";
-//import TableOne from "@/components/Tables/TableOne";
-import CardDataStats from "@/components/CardDataStats";
+import React, { useEffect, useState } from "react";
+import Loader from "@/components/common/Loader";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
-import React, { useEffect, useState } from "react";
-import Loader from "@/components/common/Loader";
-
-const Main = dynamic(() => import("@/components/Tables/BookingMui/TS"), {
+const Main = dynamic(() => import("@/components/Tables/AppoinmentMui/TS"), {
   loading: () => <Loader />,
   ssr: false, // Disable SSR for this component to ensure the loader works properly
 });
@@ -25,23 +22,20 @@ const donatointable2 = () => {
   }, []);
 
   return (
-    <>
-      <DefaultLayout>
-        <Breadcrumb pageName="Booking Management" />
-
-        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-          <div className="col-span-12 xl:col-span-12">
+    <DefaultLayout>
+      <Breadcrumb pageName="Appointment Management" />
+      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+        <div className="col-span-12 xl:col-span-12">
           {loading ? (
-              <Loader />
-            ) : (
-              <>
-                <Main />
-              </>
-            )}
-          </div>
+            <Loader />
+          ) : (
+            <>
+              <Main />
+            </>
+          )}
         </div>
-      </DefaultLayout>
-    </>
+      </div>
+    </DefaultLayout>
   );
 };
 

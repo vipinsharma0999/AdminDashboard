@@ -195,9 +195,7 @@ const Example = () => {
   const table = useMaterialReactTable({
     columns,
     data: fetchedUsers,
-    createDisplayMode: "modal",
-    editDisplayMode: "modal",
-    enableEditing: true,
+    enableEditing: false,
     getRowId: (row) => row.id,
     muiToolbarAlertBannerProps: isLoadingUsersError
       ? {
@@ -254,16 +252,6 @@ const Example = () => {
           </IconButton>
         </Tooltip>
       </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      <Button
-        variant="contained"
-        onClick={() => {
-          table.setCreatingRow(true); // Open the create row modal
-        }}
-      >
-        Create New User
-      </Button>
     ),
     state: {
       isLoading: isLoadingUsers,
