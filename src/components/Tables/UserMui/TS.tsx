@@ -25,7 +25,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type User, fakeData, indianStates } from "./makeData";
+import { type User } from "./makeData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -37,25 +37,17 @@ const Example = () => {
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
-        accessorKey: "id",
-        header: "Id",
-        enableEditing: false,
-        size: 80,
-      },
-      {
         accessorKey: "firstName",
         header: "First Name",
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.firstName,
           helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               firstName: undefined,
             }),
-          //optionally add validation checking for onBlur or onChange
         },
       },
       {
@@ -65,47 +57,12 @@ const Example = () => {
           required: true,
           error: !!validationErrors?.lastName,
           helperText: validationErrors?.lastName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               lastName: undefined,
             }),
         },
-      },
-      {
-        accessorKey: "salary",
-        header: "Salary",
-        filterVariant: "range", // enable range filter
-        filterFn: "between", // filter function for range
-        size: 50,
-        Cell: ({ cell }) => (
-          <Box
-            component="span"
-            sx={(theme) => {
-              const salaryValue = cell.getValue<number>();
-              return {
-                backgroundColor:
-                  salaryValue < 50_000
-                    ? theme.palette.error.dark
-                    : salaryValue >= 50_000 && salaryValue < 75_000
-                      ? theme.palette.warning.dark
-                      : theme.palette.success.dark,
-                borderRadius: "0.25rem",
-                color: "#fff",
-                maxWidth: "9ch",
-                p: "0.25rem",
-              };
-            }}
-          >
-            {cell.getValue<number>()?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
-          </Box>
-        ),
       },
       {
         accessorKey: "email",
@@ -115,7 +72,6 @@ const Example = () => {
           required: true,
           error: !!validationErrors?.email,
           helperText: validationErrors?.email,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -124,15 +80,63 @@ const Example = () => {
         },
       },
       {
-        accessorKey: "state",
-        header: "State",
-        editVariant: "select",
-        editSelectOptions: indianStates,
+        accessorKey: "contact",
+        header: "Contact",
         muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.state,
-          helperText: validationErrors?.state,
+          required: true,
+          error: !!validationErrors?.contact,
+          helperText: validationErrors?.contact,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              contact: undefined,
+            }),
         },
+      },
+      {
+        accessorKey: "address",
+        header: "Address",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.address,
+          helperText: validationErrors?.address,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              address: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "panCard",
+        header: "PAN Card",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.panCard,
+          helperText: validationErrors?.panCard,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              panCard: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "isVerified",
+        header: "Verified",
+        Cell: ({ cell }) => (
+          <Box
+            component="span"
+            sx={(theme) => ({
+              backgroundColor: cell.getValue<number>() === 1 ? theme.palette.success.main : theme.palette.error.main,
+              borderRadius: "0.25rem",
+              color: "#fff",
+              p: "0.25rem",
+            })}
+          >
+            {cell.getValue<number>() === 1 ? "Yes" : "No"}
+          </Box>
+        ),
       },
     ],
     [validationErrors],
@@ -199,10 +203,10 @@ const Example = () => {
     getRowId: (row) => row.id,
     muiToolbarAlertBannerProps: isLoadingUsersError
       ? {
-          color: "error",
-          children: "Error loading data",
-          position: "bottom", // Position alert banner at the bottom
-        }
+        color: "error",
+        children: "Error loading data",
+        position: "bottom", // Position alert banner at the bottom
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {
@@ -307,11 +311,34 @@ function useCreateUser() {
 //READ hook (get users from api)
 function useGetUsers() {
   return useQuery<User[]>({
-    queryKey: ["users"],
+    queryKey: ['Accounts'],
     queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(fakeData);
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem('token');
+
+      // Make API request with Authorization header
+      const response = await fetch('http://localhost:3000/users', {
+        headers: {
+          'Authorization': `${token}`, // Include the token in the Authorization header
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch Accounts');
+      }
+
+      const data = await response.json();
+      return data.map((Account: any) => ({
+        id: Account.Account_id, // Map Account_id to id for consistency
+        firstName: Account.first_name,
+        lastName: Account.last_name,
+        email: Account.email,
+        contact: Account.contact,
+        address: Account.address,
+        panCard: Account.pan_card,
+        isVerified: Account.is_verified,
+        roleId: Account.role_id,
+      }));
     },
     refetchOnWindowFocus: false,
   });

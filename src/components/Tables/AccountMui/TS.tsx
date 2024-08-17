@@ -25,23 +25,18 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type User, fakeData, usStates } from "./makeData";
+import { type Account } from "./makeData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { TextField } from "@mui/material";
 
 const Example = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
-  const columns = useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<MRT_ColumnDef<Account>[]>(
     () => [
-      {
-        accessorKey: "id",
-        header: "Id",
-        enableEditing: false,
-        size: 80,
-      },
       {
         accessorKey: "firstName",
         header: "First Name",
@@ -49,13 +44,11 @@ const Example = () => {
           required: true,
           error: !!validationErrors?.firstName,
           helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               firstName: undefined,
             }),
-          //optionally add validation checking for onBlur or onChange
         },
       },
       {
@@ -65,7 +58,6 @@ const Example = () => {
           required: true,
           error: !!validationErrors?.lastName,
           helperText: validationErrors?.lastName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -74,64 +66,17 @@ const Example = () => {
         },
       },
       {
-        accessorKey: "salary",
-        header: "Salary",
-        filterVariant: "range", // enable range filter
-        filterFn: "between", // filter function for range
-        size: 50,
-        Cell: ({ cell }) => (
-          <Box
-            component="span"
-            sx={(theme) => {
-              const salaryValue = cell.getValue<number>();
-              return {
-                backgroundColor:
-                  salaryValue < 50_000
-                    ? theme.palette.error.dark
-                    : salaryValue >= 50_000 && salaryValue < 75_000
-                      ? theme.palette.warning.dark
-                      : theme.palette.success.dark,
-                borderRadius: "0.25rem",
-                color: "#fff",
-                maxWidth: "9ch",
-                p: "0.25rem",
-              };
-            }}
-          >
-            {cell.getValue<number>()?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
-          </Box>
-        ),
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: "contact",
+        header: "Contact",
         muiEditTextFieldProps: {
-          type: "email",
           required: true,
-          error: !!validationErrors?.email,
-          helperText: validationErrors?.email,
-          //remove any previous validation errors when user focuses on the input
+          error: !!validationErrors?.contact,
+          helperText: validationErrors?.contact,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              email: undefined,
+              contact: undefined,
             }),
-        },
-      },
-      {
-        accessorKey: "state",
-        header: "State",
-        editVariant: "select",
-        editSelectOptions: usStates,
-        muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.state,
-          helperText: validationErrors?.state,
         },
       },
     ],
@@ -139,72 +84,79 @@ const Example = () => {
   );
 
   //call CREATE hook
-  const { mutateAsync: createUser, isPending: isCreatingUser } =
-    useCreateUser();
+  const { mutateAsync: createAccount, isPending: isCreatingAccount } =
+    useCreateAccount();
   //call READ hook
   const {
-    data: fetchedUsers = [],
-    isError: isLoadingUsersError,
-    isFetching: isFetchingUsers,
-    isLoading: isLoadingUsers,
-  } = useGetUsers();
+    data: fetchedAccounts = [],
+    isError: isLoadingAccountsError,
+    isFetching: isFetchingAccounts,
+    isLoading: isLoadingAccounts,
+  } = useGetAccounts();
   //call UPDATE hook
-  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
-    useUpdateUser();
+  const { mutateAsync: updateAccount, isPending: isUpdatingAccount } =
+    useUpdateAccount();
   //call DELETE hook
-  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
-    useDeleteUser();
+  const { mutateAsync: deleteAccount, isPending: isDeletingAccount } =
+    useDeleteAccount();
 
   //CREATE action
-  const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
+  const handleCreateAccount: MRT_TableOptions<Account>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    console.log(values);
+    const newValidationErrors = validateAccount(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await createUser(values);
-    table.setCreatingRow(null); //exit creating mode
+
+    try {
+      await createAccount(values);
+      table.setCreatingRow(null); // Exit creating mode
+    } catch (error) {
+      console.error('Failed to create account:', error);
+      // Handle the error (e.g., show a notification)
+    }
   };
 
   //UPDATE action
-  const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
+  const handleSaveAccount: MRT_TableOptions<Account>["onEditingRowSave"] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    const newValidationErrors = validateAccount(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await updateUser(values);
+    await updateAccount(values);
     table.setEditingRow(null); //exit editing mode
   };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<User>) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUser(row.original.id);
+  const openDeleteConfirmModal = (row: MRT_Row<Account>) => {
+    if (window.confirm("Are you sure you want to delete this Account?")) {
+      deleteAccount(row.original.id);
     }
   };
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedUsers,
+    data: fetchedAccounts,
     createDisplayMode: "modal",
     editDisplayMode: "modal",
     enableEditing: true,
     getRowId: (row) => row.id,
-    muiToolbarAlertBannerProps: isLoadingUsersError
+    muiToolbarAlertBannerProps: isLoadingAccountsError
       ? {
-          color: "error",
-          children: "Error loading data",
-          position: "bottom", // Position alert banner at the bottom
-        }
+        color: "error",
+        children: "Error loading data",
+        position: "bottom", // Position alert banner at the bottom
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {
@@ -212,16 +164,77 @@ const Example = () => {
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateUser,
+    onCreatingRowSave: handleCreateAccount,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveUser,
+    onEditingRowSave: handleSaveAccount,
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create New User</DialogTitle>
+        <DialogTitle variant="h3">Create New Account</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
-          {internalEditComponents}
+          <TextField
+            label="First Name"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.firstName}
+            helperText={validationErrors?.firstName}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              firstName: undefined
+            })}
+          />
+          <TextField
+            label="Last Name"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.lastName}
+            helperText={validationErrors?.lastName}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              lastName: undefined
+            })}
+          />
+          <TextField
+            label="Contact"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.contact}
+            helperText={validationErrors?.contact}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              contact: undefined
+            })}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.password}
+            helperText={validationErrors?.password}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              password: undefined
+            })}
+          />
+          <TextField
+            label="Confirm Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.confirmPassword}
+            helperText={validationErrors?.confirmPassword}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              confirmPassword: undefined
+            })}
+          />
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -230,11 +243,75 @@ const Example = () => {
     ),
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit User</DialogTitle>
+        <DialogTitle variant="h3">Edit Account</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
-          {internalEditComponents}
+          <TextField
+            label="First Name"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.firstName}
+            helperText={validationErrors?.firstName}
+            defaultValue={row.original.firstName}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              firstName: undefined
+            })}
+          />
+          <TextField
+            label="Last Name"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.lastName}
+            helperText={validationErrors?.lastName}
+            defaultValue={row.original.lastName}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              lastName: undefined
+            })}
+          />
+          <TextField
+            label="Contact"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.contact}
+            helperText={validationErrors?.contact}
+            defaultValue={row.original.contact}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              contact: undefined
+            })}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.password}
+            helperText={validationErrors?.password}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              password: undefined
+            })}
+          />
+          <TextField
+            label="Confirm Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            required
+            error={!!validationErrors?.confirmPassword}
+            helperText={validationErrors?.confirmPassword}
+            onChange={(e) => setValidationErrors({
+              ...validationErrors,
+              confirmPassword: undefined
+            })}
+          />
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -262,14 +339,14 @@ const Example = () => {
           table.setCreatingRow(true); // Open the create row modal
         }}
       >
-        Create New User
+        Create New Account
       </Button>
     ),
     state: {
-      isLoading: isLoadingUsers,
-      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
-      showAlertBanner: isLoadingUsersError,
-      showProgressBars: isFetchingUsers,
+      isLoading: isLoadingAccounts,
+      isSaving: isCreatingAccount || isUpdatingAccount || isDeletingAccount,
+      showAlertBanner: isLoadingAccountsError,
+      showProgressBars: isFetchingAccounts,
     },
     paginationDisplayMode: "pages", // Use page-based pagination
     positionToolbarAlertBanner: "bottom", // Position alert banner at the bottom
@@ -289,83 +366,121 @@ const Example = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//CREATE hook (post new user to api)
-function useCreateUser() {
+//CREATE hook (post new Account to api)
+function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (newAccount: Account) => {
+      const response = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${localStorage.getItem('token')}`, // Include the token in the Authorization header
+        },
+        body: JSON.stringify(newAccount),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create account');
+      }
+
+      return response.json(); // Return the response from the API
     },
-    //client side optimistic update
-    onMutate: (newUserInfo: User) => {
+    // Client-side optimistic update
+    onMutate: (newAccountInfo: Account) => {
       queryClient.setQueryData(
-        ["users"],
-        (prevUsers: any) =>
-          [
-            ...prevUsers,
-            {
-              ...newUserInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
-            },
-          ] as User[],
+        ['Accounts'],
+        (prevAccounts: Account[] | undefined) =>
+          prevAccounts
+            ? [
+              ...prevAccounts,
+              {
+                ...newAccountInfo,
+                id: (Math.random() + 1).toString(36).substring(7),
+              },
+            ]
+            : [newAccountInfo]
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // Optionally refetch accounts after mutation
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Accounts'] }),
   });
 }
 
-//READ hook (get users from api)
-function useGetUsers() {
-  return useQuery<User[]>({
-    queryKey: ["users"],
+
+//READ hook (get Accounts from api)
+function useGetAccounts() {
+  return useQuery<Account[]>({
+    queryKey: ['Accounts'],
     queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(fakeData);
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem('token');
+
+      // Make API request with Authorization header
+      const response = await fetch('http://localhost:3000/users/allaccounts', {
+        headers: {
+          'Authorization': `${token}`, // Include the token in the Authorization header
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch Accounts');
+      }
+
+      const data = await response.json();
+      return data.map((Account: any) => ({
+        id: Account.Account_id, // Map Account_id to id for consistency
+        firstName: Account.first_name,
+        lastName: Account.last_name,
+        email: Account.email,
+        contact: Account.contact,
+        address: Account.address,
+        panCard: Account.pan_card,
+        isVerified: Account.is_verified,
+        roleId: Account.role_id,
+      }));
     },
     refetchOnWindowFocus: false,
   });
 }
 
-//UPDATE hook (put user in api)
-function useUpdateUser() {
+//UPDATE hook (put Account in api)
+function useUpdateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
+    mutationFn: async (Account: Account) => {
       //send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
-    onMutate: (newUserInfo: User) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.map((prevUser: User) =>
-          prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
+    onMutate: (newAccountInfo: Account) => {
+      queryClient.setQueryData(["Accounts"], (prevAccounts: any) =>
+        prevAccounts?.map((prevAccount: Account) =>
+          prevAccount.id === newAccountInfo.id ? newAccountInfo : prevAccount,
         ),
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Accounts'] }), //refetch Accounts after mutation, disabled for demo
   });
 }
 
-//DELETE hook (delete user in api)
-function useDeleteUser() {
+//DELETE hook (delete Account in api)
+function useDeleteAccount() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async (AccountId: string) => {
       //send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
-    onMutate: (userId: string) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.filter((user: User) => user.id !== userId),
+    onMutate: (AccountId: string) => {
+      queryClient.setQueryData(["Accounts"], (prevAccounts: any) =>
+        prevAccounts?.filter((Account: Account) => Account.id !== AccountId),
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Accounts'] }), //refetch Accounts after mutation, disabled for demo
   });
 }
 
@@ -389,12 +504,14 @@ const validateEmail = (email: string) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 
-function validateUser(user: User) {
-  return {
-    firstName: !validateRequired(user.firstName)
-      ? "First Name is Required"
-      : "",
-    lastName: !validateRequired(user.lastName) ? "Last Name is Required" : "",
-    email: !validateEmail(user.email) ? "Incorrect Email Format" : "",
+function validateAccount(Account: Account & { password?: string; confirmPassword?: string }) {
+  const errors: Record<string, string | undefined> = {
+    firstName: !validateRequired(Account.firstName) ? "First Name is Required" : "",
+    lastName: !validateRequired(Account.lastName) ? "Last Name is Required" : "",
+    email: !validateEmail(Account.email) ? "Incorrect Email Format" : "",
+    password: !validateRequired(Account.password || "") ? "Password is Required" : "",
+    confirmPassword: Account.password !== Account.confirmPassword ? "Passwords do not match" : "",
   };
+
+  return errors;
 }

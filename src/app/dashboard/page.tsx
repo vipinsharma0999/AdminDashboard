@@ -1,81 +1,96 @@
 "use client";
-import dynamic from "next/dynamic";
 import React from "react";
 import { useEffect, useState } from "react";
-import TableOne from "../../components/Tables/TableOne";
 import CardDataStats from "../../components/CardDataStats";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Loader from "@/components/common/Loader";
-
-const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
-  ssr: false,
-});
-
-const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
-  ssr: false,
-});
+import { NotificationManager } from "react-notifications";
+import { notifyManager } from "@tanstack/react-query";
 
 const dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  // Initialize dates for the current month
+  useEffect(() => {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    setStartDate(start.toISOString().split('T')[0]);
+    setEndDate(end.toISOString().split('T')[0]);
+  }, []);
+
+  const fetchData = async () => {
+    if (new Date(endDate) < new Date(startDate)) {
+      NotificationManager.warning("End Date cannot be before Start Date.", "Warning", 3000);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:3000/report?startDate=${startDate}&endDate=${endDate}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const result = await response.json();
+      setData(result[0]);
+      setReferrals(result[1]);
+    } catch (error) {
+      setError('Failed to fetch report');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate a delay for loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Adjust time as needed
-    return () => clearTimeout(timer); // Clean up the timer on component unmount
-  }, []);
+    if (startDate && endDate) {
+      fetchData();
+    }
+  }, [startDate, endDate]);
 
   if (loading) {
     return (
       <DefaultLayout>
-          <Loader /> {/* Loader component here */}
+        <Loader /> {/* Loader component here */}
       </DefaultLayout>
     );
   }
 
   return (
     <>
-      <DefaultLayout>  
-        <div className="relative z-20 inline-block">
-          <select
-            name="#"
-            id="#"
-            className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
-          >
-            <option value="" className="dark:bg-boxdark">
-              Daily
-            </option>
-            <option value="" className="dark:bg-boxdark">
-              Weekly
-            </option>
-            <option value="" className="dark:bg-boxdark">
-              Monthly
-            </option>
-          </select>
-          <span className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
-            <svg
-              width="10"
-              height="6"
-              viewBox="0 0 10 6"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M0.47072 1.08816C0.47072 1.02932 0.500141 0.955772 0.54427 0.911642C0.647241 0.808672 0.809051 0.808672 0.912022 0.896932L4.85431 4.60386C4.92785 4.67741 5.06025 4.67741 5.14851 4.60386L9.09079 0.896932C9.19376 0.793962 9.35557 0.808672 9.45854 0.911642C9.56151 1.01461 9.5468 1.17642 9.44383 1.27939L5.50155 4.98632C5.22206 5.23639 4.78076 5.23639 4.51598 4.98632L0.558981 1.27939C0.50014 1.22055 0.47072 1.16171 0.47072 1.08816Z"
-                fill="#637381"
+      <DefaultLayout>
+        <div className="relative z-20 bg-white p-4 rounded-lg shadow-md mb-6">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center flex-1">
+              <label htmlFor="start-date" className="text-sm font-medium text-gray-700 w-24">Start Date:</label>
+              <input
+                type="date"
+                id="start-date"
+                name="start-date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-white py-2 pl-4 pr-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1.22659 0.546578L5.00141 4.09604L8.76422 0.557869C9.08459 0.244537 9.54201 0.329403 9.79139 0.578788C10.112 0.899434 10.0277 1.36122 9.77668 1.61224L9.76644 1.62248L5.81552 5.33722C5.36257 5.74249 4.6445 5.7544 4.19352 5.32924C4.19327 5.32901 4.19377 5.32948 4.19352 5.32924L0.225953 1.61241C0.102762 1.48922 -4.20186e-08 1.31674 -3.20269e-08 1.08816C-2.40601e-08 0.905899 0.0780105 0.712197 0.211421 0.578787C0.494701 0.295506 0.935574 0.297138 1.21836 0.539529L1.22659 0.546578ZM4.51598 4.98632C4.78076 5.23639 5.22206 5.23639 5.50155 4.98632L9.44383 1.27939C9.5468 1.17642 9.56151 1.01461 9.45854 0.911642C9.35557 0.808672 9.19376 0.793962 9.09079 0.896932L5.14851 4.60386C5.06025 4.67741 4.92785 4.67741 4.85431 4.60386L0.912022 0.896932C0.809051 0.808672 0.647241 0.808672 0.54427 0.911642C0.500141 0.955772 0.47072 1.02932 0.47072 1.08816C0.47072 1.16171 0.50014 1.22055 0.558981 1.27939L4.51598 4.98632Z"
-                fill="#637381"
+            </div>
+            <div className="flex items-center flex-1">
+              <label htmlFor="end-date" className="text-sm font-medium text-gray-700 w-24">End Date:</label>
+              <input
+                type="date"
+                id="end-date"
+                name="end-date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-white py-2 pl-4 pr-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
-            </svg>
-          </span>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-          <CardDataStats title="Total Pooja" total="3" rate="">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-6">
+          <CardDataStats title="Total Pooja" total={data[0]['Number of Bookings']} rate="">
             <svg
               width="25px"
               height="25px"
@@ -92,7 +107,7 @@ const dashboard: React.FC = () => {
               />
             </svg>
           </CardDataStats>
-          <CardDataStats title="Total Special Pooja" total="4" rate="">
+          <CardDataStats title="Total Special Pooja" total={data[0]['Number of Bookings']} rate="">
             <svg
               width="25px"
               height="25px"
@@ -147,7 +162,7 @@ const dashboard: React.FC = () => {
               ></path>
             </svg>
           </CardDataStats>
-          <CardDataStats title="Total Collection" total="9,500" rate="">
+          <CardDataStats title="Total Collection" total={data[0] ? data[0]['Total Donation Amount'] || 0 : 0} rate="">
             <svg
               className="fill-primary dark:fill-white"
               width="22"
@@ -166,7 +181,7 @@ const dashboard: React.FC = () => {
               />
             </svg>
           </CardDataStats>
-          <CardDataStats title="Total Users" total="34" rate="">
+          <CardDataStats title="Total Users" total={data[0]['Number of Users Registered']} rate="">
             <svg
               className="fill-primary dark:fill-white"
               width="22"
@@ -191,11 +206,48 @@ const dashboard: React.FC = () => {
           </CardDataStats>
         </div>
 
-        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-          <div className="col-span-12 xl:col-span-12">
-            <TableOne />
+        {referrals.length > 0 ? (
+          <div>
+            <div className="grid grid-cols-4 rounded-sm bg-white sm:grid-cols-4">
+              <div className="p-2.5 text-center xl:p-5">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">
+                  User Name
+                </h5>
+              </div>
+              <div className="p-2.5 text-center xl:p-5">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">
+                  Number of Referrals
+                </h5>
+              </div>
+              <div className="p-2.5 text-center xl:p-5">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">
+                  Total Referral Donations
+                </h5>
+              </div>
+            </div>
+
+            {referrals.map((referral, index) => (
+              <div
+                className={`grid grid-cols-4 sm:grid-cols-4 ${index === referrals.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"}`}
+                key={referral.user_id}
+              >
+                <div className="flex items-center justify-center p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">{referral['User Name']}</p>
+                </div>
+                <div className="flex items-center justify-center p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">{referral['Number of Referrals'] || 0}</p>
+                </div>
+                <div className="flex items-center justify-center p-2.5 xl:p-5">
+                  <p className="text-meta-3">{referral['Total Referral Donations'] || 0}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="text-center p-4">
+            <p className="text-gray-500 dark:text-gray-400">No referral data available</p>
+          </div>
+        )}
       </DefaultLayout>
     </>
   );

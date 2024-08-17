@@ -25,7 +25,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type User, fakeData, usStates } from "./makeData";
+import { type Slot } from "./makeData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -34,177 +34,124 @@ const Example = () => {
     Record<string, string | undefined>
   >({});
 
-  const columns = useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<MRT_ColumnDef<Slot>[]>(
     () => [
       {
-        accessorKey: "id",
-        header: "Id",
-        enableEditing: false,
-        size: 80,
-      },
-      {
-        accessorKey: "firstName",
-        header: "First Name",
+        accessorKey: "purposeId",
+        header: "Purpose ID",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.firstName,
-          helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
+          error: !!validationErrors?.purposeId,
+          helperText: validationErrors?.purposeId,
+          // Remove any previous validation errors when the input is focused
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              firstName: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-      },
-      {
-        accessorKey: "lastName",
-        header: "Last Name",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.lastName,
-          helperText: validationErrors?.lastName,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              lastName: undefined,
+              purposeId: undefined,
             }),
         },
       },
       {
-        accessorKey: "salary",
-        header: "Salary",
-        filterVariant: "range", // enable range filter
-        filterFn: "between", // filter function for range
-        size: 50,
-        Cell: ({ cell }) => (
-          <Box
-            component="span"
-            sx={(theme) => {
-              const salaryValue = cell.getValue<number>();
-              return {
-                backgroundColor:
-                  salaryValue < 50_000
-                    ? theme.palette.error.dark
-                    : salaryValue >= 50_000 && salaryValue < 75_000
-                      ? theme.palette.warning.dark
-                      : theme.palette.success.dark,
-                borderRadius: "0.25rem",
-                color: "#fff",
-                maxWidth: "9ch",
-                p: "0.25rem",
-              };
-            }}
-          >
-            {cell.getValue<number>()?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
-          </Box>
-        ),
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: "startTime",
+        header: "Start Time",
         muiEditTextFieldProps: {
-          type: "email",
+          type: "time",
           required: true,
-          error: !!validationErrors?.email,
-          helperText: validationErrors?.email,
-          //remove any previous validation errors when user focuses on the input
+          error: !!validationErrors?.startTime,
+          helperText: validationErrors?.startTime,
+          // Remove any previous validation errors when the input is focused
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              email: undefined,
+              startTime: undefined,
             }),
         },
       },
       {
-        accessorKey: "state",
-        header: "State",
-        editVariant: "select",
-        editSelectOptions: usStates,
+        accessorKey: "endTime",
+        header: "End Time",
         muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.state,
-          helperText: validationErrors?.state,
+          type: "time",
+          required: true,
+          error: !!validationErrors?.endTime,
+          helperText: validationErrors?.endTime,
+          // Remove any previous validation errors when the input is focused
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              endTime: undefined,
+            }),
         },
       },
     ],
-    [validationErrors],
+    [validationErrors]
   );
 
+
   //call CREATE hook
-  const { mutateAsync: createUser, isPending: isCreatingUser } =
-    useCreateUser();
+  const { mutateAsync: createSlot, isPending: isCreatingSlot } =
+    useCreateSlot();
   //call READ hook
   const {
-    data: fetchedUsers = [],
-    isError: isLoadingUsersError,
-    isFetching: isFetchingUsers,
-    isLoading: isLoadingUsers,
-  } = useGetUsers();
+    data: fetchedSlots = [],
+    isError: isLoadingSlotsError,
+    isFetching: isFetchingSlots,
+    isLoading: isLoadingSlots,
+  } = useGetSlots();
   //call UPDATE hook
-  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
-    useUpdateUser();
+  const { mutateAsync: updateSlot, isPending: isUpdatingSlot } =
+    useUpdateSlot();
   //call DELETE hook
-  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
-    useDeleteUser();
+  const { mutateAsync: deleteSlot, isPending: isDeletingSlot } =
+    useDeleteSlot();
 
   //CREATE action
-  const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
+  const handleCreateSlot: MRT_TableOptions<Slot>["onCreatingRowSave"] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    const newValidationErrors = validateSlot(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await createUser(values);
+    await createSlot(values);
     table.setCreatingRow(null); //exit creating mode
   };
 
   //UPDATE action
-  const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
+  const handleSaveSlot: MRT_TableOptions<Slot>["onEditingRowSave"] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    const newValidationErrors = validateSlot(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await updateUser(values);
     table.setEditingRow(null); //exit editing mode
   };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<User>) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUser(row.original.id);
+  const openDeleteConfirmModal = (row: MRT_Row<Slot>) => {
+    if (window.confirm("Are you sure you want to delete this Slot?")) {
     }
   };
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedUsers,
+    data: fetchedSlots,
     createDisplayMode: "modal",
     editDisplayMode: "modal",
     enableEditing: true,
-    getRowId: (row) => row.id,
-    muiToolbarAlertBannerProps: isLoadingUsersError
+    muiToolbarAlertBannerProps: isLoadingSlotsError
       ? {
-          color: "error",
-          children: "Error loading data",
-          position: "bottom", // Position alert banner at the bottom
-        }
+        color: "error",
+        children: "Error loading data",
+        position: "bottom", // Position alert banner at the bottom
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {
@@ -212,12 +159,12 @@ const Example = () => {
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateUser,
+    onCreatingRowSave: handleCreateSlot,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveUser,
+    onEditingRowSave: handleSaveSlot,
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create New User</DialogTitle>
+        <DialogTitle variant="h3">Create New Slot</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -230,7 +177,7 @@ const Example = () => {
     ),
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit User</DialogTitle>
+        <DialogTitle variant="h3">Edit Slot</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -262,14 +209,14 @@ const Example = () => {
           table.setCreatingRow(true); // Open the create row modal
         }}
       >
-        Create New User
+        Create New Slot
       </Button>
     ),
     state: {
-      isLoading: isLoadingUsers,
-      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
-      showAlertBanner: isLoadingUsersError,
-      showProgressBars: isFetchingUsers,
+      isLoading: isLoadingSlots,
+      isSaving: isCreatingSlot || isUpdatingSlot || isDeletingSlot,
+      showAlertBanner: isLoadingSlotsError,
+      showProgressBars: isFetchingSlots,
     },
     paginationDisplayMode: "pages", // Use page-based pagination
     positionToolbarAlertBanner: "bottom", // Position alert banner at the bottom
@@ -289,83 +236,77 @@ const Example = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//CREATE hook (post new user to api)
-function useCreateUser() {
+//CREATE hook (post new Slot to api)
+function useCreateSlot() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
+    mutationFn: async (Slot: Slot) => {
       //send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
-    onMutate: (newUserInfo: User) => {
+    onMutate: (newSlotInfo: Slot) => {
       queryClient.setQueryData(
-        ["users"],
-        (prevUsers: any) =>
+        ["Slots"],
+        (prevSlots: any) =>
           [
-            ...prevUsers,
+            ...prevSlots,
             {
-              ...newUserInfo,
+              ...newSlotInfo,
               id: (Math.random() + 1).toString(36).substring(7),
             },
-          ] as User[],
+          ] as Slot[],
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Slots'] }), //refetch Slots after mutation, disabled for demo
   });
 }
 
-//READ hook (get users from api)
-function useGetUsers() {
-  return useQuery<User[]>({
-    queryKey: ["users"],
+//READ hook (get Slots from api)
+function useGetSlots() {
+  return useQuery<Slot[]>({
+    queryKey: ['slots'],
     queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(fakeData);
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem('token');
+
+      // Make API request with Authorization header
+      const response = await fetch('http://localhost:3000/slots', {
+        headers: {
+          'Authorization': `${token}`, // Include the token in the Authorization header
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch Slots');
+      }
+
+      const data = await response.json();
+      return data.map((item: any) => ({
+        slotId: item.slot_id,
+        purposeId: item.purpose_id,
+        startTime: item.start_time,
+        endTime: item.end_time,
+      }));
     },
     refetchOnWindowFocus: false,
   });
 }
 
-//UPDATE hook (put user in api)
-function useUpdateUser() {
+//UPDATE hook (put Slot in api)
+function useUpdateSlot() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUserInfo: User) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.map((prevUser: User) =>
-          prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
-        ),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Slots'] }), //refetch Slots after mutation, disabled for demo
   });
 }
 
-//DELETE hook (delete user in api)
-function useDeleteUser() {
+//DELETE hook (delete Slot in api)
+function useDeleteSlot() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (userId: string) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (userId: string) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.filter((user: User) => user.id !== userId),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Slots'] }), //refetch Slots after mutation, disabled for demo
   });
 }
 
@@ -389,12 +330,6 @@ const validateEmail = (email: string) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 
-function validateUser(user: User) {
-  return {
-    firstName: !validateRequired(user.firstName)
-      ? "First Name is Required"
-      : "",
-    lastName: !validateRequired(user.lastName) ? "Last Name is Required" : "",
-    email: !validateEmail(user.email) ? "Incorrect Email Format" : "",
-  };
+function validateSlot(Slot: Slot) {
+  return {};
 }

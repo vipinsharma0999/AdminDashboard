@@ -1,26 +1,34 @@
 "use client";
 import dynamic from "next/dynamic";
-//import TableOne from "@/components/Tables/TableOne";
-import CardDataStats from "@/components/CardDataStats";
+import React, { useState, useEffect } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 
+// Dynamically load the Main component with loader and SSR disabled
 const Main = dynamic(() => import("@/components/Tables/UserMui/TS"), {
-  loading: () => <Loader />,
-  ssr: false, // Disable SSR for this component to ensure the loader works properly
+  ssr: false,
+  loading: () => <Loader />, // Show Loader while the component is loading
 });
 
-const donatointable2 = () => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+const UserTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // Start loading process when component mounts
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000); // Adjust the delay as needed
+    setLoading(true);
+  }, []);
 
-    return () => clearTimeout(timer); // Clear timeout if component unmounts
+  // Stop loading once the Main component is fully loaded
+  useEffect(() => {
+    const handleMainLoad = () => {
+      setLoading(false);
+    };
+
+    // Simulate Main component load completion
+    const timer = setTimeout(handleMainLoad, 2000); // Adjust the timing or condition as needed
+
+    return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
   }, []);
 
   return (
@@ -33,9 +41,9 @@ const donatointable2 = () => {
             {loading ? (
               <Loader />
             ) : (
-              <>
+              <div style={{ display: loading ? "none" : "block" }}>
                 <Main />
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -44,4 +52,4 @@ const donatointable2 = () => {
   );
 };
 
-export default donatointable2;
+export default UserTable;

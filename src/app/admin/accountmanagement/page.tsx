@@ -1,27 +1,35 @@
 "use client";
 import dynamic from "next/dynamic";
-// import TableOne from "@/components/Tables/TableOne";
-import CardDataStats from "@/components/CardDataStats";
+import React, { useState, useEffect } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-
-import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 
+// Dynamically load the Table component with loader and SSR disabled
 const Table = dynamic(() => import("@/components/Tables/AccountMui/TS"), {
-  loading: () => <Loader />,
-  ssr: false, // Disable SSR for this component to ensure the loader works properly
+  ssr: false,
+  loading: () => <Loader />, // Show Loader while the component is loading
 });
 
-const donatointable1: React.FC = () => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+const AccountTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // When the component mounts, we start the loading process
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000); // Adjust the delay as needed
+    setLoading(true);
+  }, []);
 
-    return () => clearTimeout(timer); // Clear timeout if component unmounts 
+  // Once the table component has mounted, we stop showing the loader
+  useEffect(() => {
+    const handleTableLoad = () => {
+      setLoading(false);
+    };
+
+    // Simulate table load completion by using a timeout or other logic here.
+    // If Table has any event or lifecycle to detect the loading completion, we can place that logic here.
+    const timer = setTimeout(handleTableLoad, 1000); // You can adjust the timing or condition to your needs
+
+    return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
   }, []);
 
   return (
@@ -34,9 +42,9 @@ const donatointable1: React.FC = () => {
             {loading ? (
               <Loader />
             ) : (
-              <>
+              <div style={{ display: loading ? "none" : "block" }}>
                 <Table />
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -45,4 +53,4 @@ const donatointable1: React.FC = () => {
   );
 };
 
-export default donatointable1;
+export default AccountTable;

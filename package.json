@@ -25,7 +25,6 @@
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18",
     "react-notifications": "^1.7.4",
-    "react-toastify": "^10.0.5",
     "yup": "^1.4.0"
   },
   "devDependencies": {
