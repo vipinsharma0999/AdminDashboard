@@ -25,7 +25,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type User, fakeData, usStates } from "./makeData";
+import { type User, fakeData, indianStates } from "./makeData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -127,7 +127,7 @@ const Example = () => {
         accessorKey: "state",
         header: "State",
         editVariant: "select",
-        editSelectOptions: usStates,
+        editSelectOptions: indianStates,
         muiEditTextFieldProps: {
           select: true,
           error: !!validationErrors?.state,

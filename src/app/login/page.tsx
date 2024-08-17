@@ -1,61 +1,75 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
-import { Formik, Form, Field, ErrorMessage, FieldProps } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
+// Define the validation schema using Yup
 const validationSchema = Yup.object({
-  email: Yup.string()
-    .required('Email is required')
-    .email('Email is invalid'),
+  contact: Yup.string().required("Phone Number is required"),
   password: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
 });
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    // Simulate a delay for loading
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000); // Adjust time as needed
-    return () => clearTimeout(timer); // Clean up the timer on component unmount
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
-    return (
-      <>
-        <Loader /> {/* Loader component here */}
-      </>
-    );
+    return <Loader />;
   }
 
+  // Remove any existing token from localStorage
   localStorage.removeItem("token");
-  const router = useRouter(); // Initialize useRouter
 
-  const handleSubmit = (values: { email: string; password: string }) => {
-    // Add your authentication logic here (e.g., API call)
+  // Handle form submission
+  const handleSubmit = async (values: { contact: string; password: string }) => {
+    try {
+      const response = await fetch("http://localhost:3500/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-    localStorage.setItem("token", "token");
-    // Redirect to another page on successful login
-    router.push("/dashboard"); // Replace with your target route
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        toast.success("Login successful! Redirecting to dashboard...");
+        router.push("/dashboard");
+      } else {
+        toast.error(data.message || "Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      toast.error("Username or password is incorrect");
+      console.error("Error during login:", error);
+    }
   };
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="w-full max-w-md border-stroke dark:border-strokedark xl:w-1/2 max-sm:p-5">
-        <div className="w-full p-10 sm:p-15.5 xl:p-20.5 border-2 border-gray-300 rounded-lg shadow-lg bg-white dark:bg-gray-800">
+      <div className="w-full max-w-md border-stroke dark:border-strokedark max-sm:p-5 xl:w-1/2">
+        <div className="xl:p-20.5 border-gray-300 dark:bg-gray-800 w-full rounded-lg border-2 bg-white p-10 shadow-lg sm:p-15.5">
           <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
             Login to ISKCON Jaipur
           </h2>
 
           <Formik
-            initialValues={{ email: '', password: '' }}
+            initialValues={{ contact: "", password: "" }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
@@ -63,39 +77,38 @@ const Login: React.FC = () => {
               <Form>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Email
+                    Phone Number
                   </label>
                   <div className="relative">
                     <Field
-                      type="email"
-                      name="email"
-                      placeholder="Enter your email"
+                      type="text"
+                      name="contact"
+                      placeholder="Enter your contact"
                       className={`w-full rounded-lg border ${
-                        errors.email && touched.email
-                          ? 'border-red'
-                          : 'border-stroke'
+                        errors.contact && touched.contact
+                          ? "border-red"
+                          : "border-stroke"
                       } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <ErrorMessage
-                      name="email"
+                      name="contact"
                       component="div"
-                      className="text-red text-sm"
+                      className="text-sm text-red"
                     />
                     <span className="absolute right-4 top-4">
                       <svg
-                        className="fill-current"
+                        xmlns="http://www.w3.org/2000/svg"
                         width="22"
                         height="22"
-                        viewBox="0 0 22 22"
+                        viewBox="0 0 24 24"
                         fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                        stroke="#b1b9c5"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="feather feather-phone"
                       >
-                        <g opacity="0.5">
-                          <path
-                            d="M19.2516 3.30005H2.75156C1.58281 3.30005 0.585938 4.26255 0.585938 5.46567V16.6032C0.585938 17.7719 1.54844 18.7688 2.75156 18.7688H19.2516C20.4203 18.7688 21.4172 17.8063 21.4172 16.6032V5.4313C21.4172 4.26255 20.4203 3.30005 19.2516 3.30005ZM19.2516 4.84692C19.2859 4.84692 19.3203 4.84692 19.3547 4.84692L11.0016 10.2094L2.64844 4.84692C2.68281 4.84692 2.71719 4.84692 2.75156 4.84692H19.2516ZM19.2516 17.1532H2.75156C2.40781 17.1532 2.13281 16.8782 2.13281 16.5344V6.35942L10.1766 11.5157C10.4172 11.6875 10.6922 11.7563 10.9672 11.7563C11.2422 11.7563 11.5172 11.6875 11.7578 11.5157L19.8016 6.35942V16.5688C19.8703 16.9125 19.5953 17.1532 19.2516 17.1532Z"
-                            fill=""
-                          />
-                        </g>
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3.08 4.18 2 2 0 0 1 5 2h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .56 2.57 2 2 0 0 1-.45 2l-1.27 1.27a16 16 0 0 0 6.58 6.58l1.27-1.27a2 2 0 0 1 2-.45 12.05 12.05 0 0 0 2.57.56A2 2 0 0 1 22 16.92z"></path>
                       </svg>
                     </span>
                   </div>
@@ -112,14 +125,14 @@ const Login: React.FC = () => {
                       placeholder="Enter your password"
                       className={`w-full rounded-lg border ${
                         errors.password && touched.password
-                          ? 'border-red'
-                          : 'border-stroke'
+                          ? "border-red"
+                          : "border-stroke"
                       } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <ErrorMessage
                       name="password"
                       component="div"
-                      className="text-red text-sm"
+                      className="text-sm text-red"
                     />
                     <span className="absolute right-4 top-4">
                       <svg
@@ -157,8 +170,22 @@ const Login: React.FC = () => {
           </Formik>
         </div>
       </div>
+      {/* React Toastify Container for notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };
 
 export default Login;
+
