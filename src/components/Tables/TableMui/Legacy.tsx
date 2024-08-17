@@ -1,5 +1,5 @@
-'use client'
-import { useMemo } from 'react';
+"use client";
+import { useMemo } from "react";
 
 //MRT Imports
 import {
@@ -7,7 +7,7 @@ import {
   MRT_GlobalFilterTextField,
   type MRT_ColumnDef,
   MRT_ToggleFiltersButton,
-} from 'material-react-table';
+} from "material-react-table";
 
 //Material UI Imports
 import {
@@ -17,13 +17,13 @@ import {
   MenuItem,
   Typography,
   lighten,
-} from '@mui/material';
+} from "@mui/material";
 
 //Icons Imports
-import { AccountCircle, Send } from '@mui/icons-material';
+import { AccountCircle, Send } from "@mui/icons-material";
 
 //Mock Data
-import { data } from './MakeData';
+import { data } from "./MakeData";
 
 export type Employee = {
   firstName: string;
@@ -40,20 +40,20 @@ const Example = () => {
   const columns = useMemo<MRT_ColumnDef<Employee>[]>(
     () => [
       {
-        id: 'employee', //id used to define `group` column
-        header: 'Employee',
+        id: "employee", //id used to define `group` column
+        header: "Employee",
         columns: [
           {
             accessorFn: (row) => `${row.firstName} ${row.lastName}`, //accessorFn used to join multiple data into a single cell
-            id: 'name', //id is still required when using accessorFn instead of accessorKey
-            header: 'Name',
+            id: "name", //id is still required when using accessorFn instead of accessorKey
+            header: "Name",
             size: 250,
             Cell: ({ renderedCellValue, row }) => (
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
                 }}
               >
                 <img
@@ -61,7 +61,7 @@ const Example = () => {
                   height={30}
                   src={row.original.avatar}
                   loading="lazy"
-                  style={{ borderRadius: '50%' }}
+                  style={{ borderRadius: "50%" }}
                 />
                 {/* using renderedCellValue instead of cell.getValue() preserves filter match highlighting */}
                 <span>{renderedCellValue}</span>
@@ -69,23 +69,23 @@ const Example = () => {
             ),
           },
           {
-            accessorKey: 'email', //accessorKey used to define `data` column. `id` gets set to accessorKey automatically
+            accessorKey: "email", //accessorKey used to define `data` column. `id` gets set to accessorKey automatically
             enableClickToCopy: true,
-            filterVariant: 'autocomplete',
-            header: 'Email',
+            filterVariant: "autocomplete",
+            header: "Email",
             size: 300,
           },
         ],
       },
       {
-        id: 'id',
-        header: 'Job Info',
+        id: "id",
+        header: "Job Info",
         columns: [
           {
-            accessorKey: 'salary',
+            accessorKey: "salary",
             // filterVariant: 'range', //if not using filter modes feature, use this instead of filterFn
-            filterFn: 'between',
-            header: 'Salary',
+            filterFn: "between",
+            header: "Salary",
             size: 200,
             //custom conditional format and styling
             Cell: ({ cell }) => (
@@ -99,15 +99,15 @@ const Example = () => {
                           cell.getValue<number>() < 75_000
                         ? theme.palette.warning.dark
                         : theme.palette.success.dark,
-                  borderRadius: '0.25rem',
-                  color: '#fff',
-                  maxWidth: '9ch',
-                  p: '0.25rem',
+                  borderRadius: "0.25rem",
+                  color: "#fff",
+                  maxWidth: "9ch",
+                  p: "0.25rem",
                 })}
               >
-                {cell.getValue<number>()?.toLocaleString?.('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                {cell.getValue<number>()?.toLocaleString?.("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
@@ -115,22 +115,22 @@ const Example = () => {
             ),
           },
           {
-            accessorKey: 'jobTitle', //hey a simple column for once
-            header: 'Job Title',
+            accessorKey: "jobTitle", //hey a simple column for once
+            header: "Job Title",
             size: 350,
           },
           {
             accessorFn: (row) => new Date(row.startDate), //convert to Date for sorting and filtering
-            id: 'startDate',
-            header: 'Start Date',
-            filterVariant: 'date',
-            filterFn: 'lessThan',
-            sortingFn: 'datetime',
+            id: "startDate",
+            header: "Start Date",
+            filterVariant: "date",
+            filterFn: "lessThan",
+            sortingFn: "datetime",
             Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString(), //render Date as a string
             Header: ({ column }) => <em>{column.columnDef.header}</em>, //custom header markup
             muiFilterTextFieldProps: {
               sx: {
-                minWidth: '250px',
+                minWidth: "250px",
               },
             },
           },
@@ -141,140 +141,147 @@ const Example = () => {
   );
 
   return (
-    <MaterialReactTable
-      columns={columns}
-      data={data}
-      enableColumnFilterModes
-      enableColumnOrdering
-      enableGrouping
-      enableColumnPinning
-      enableRowActions
-      enableRowSelection
-      initialState={{ showColumnFilters: true }}
-      positionToolbarAlertBanner="bottom"
-      renderDetailPanel={({ row }) => (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-          }}
-        >
-          <img
-            alt="avatar"
-            height={200}
-            src={row.original.avatar}
-            loading="lazy"
-            style={{ borderRadius: '50%' }}
-          />
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h4">Signature Catch Phrase:</Typography>
-            <Typography variant="h1">
-              &quot;{row.original.signatureCatchPhrase}&quot;
-            </Typography>
-          </Box>
-        </Box>
-      )}
-      renderRowActionMenuItems={({ closeMenu }) => [
-        <MenuItem
-          key={0}
-          onClick={() => {
-            // View profile logic...
-            closeMenu();
-          }}
-          sx={{ m: 0 }}
-        >
-          <ListItemIcon>
-            <AccountCircle />
-          </ListItemIcon>
-          View Profile
-        </MenuItem>,
-        <MenuItem
-          key={1}
-          onClick={() => {
-            // Send email logic...
-            closeMenu();
-          }}
-          sx={{ m: 0 }}
-        >
-          <ListItemIcon>
-            <Send />
-          </ListItemIcon>
-          Send Email
-        </MenuItem>,
-      ]}
-      renderTopToolbar={({ table }) => {
-        const handleDeactivate = () => {
-          table.getSelectedRowModel().flatRows.map((row) => {
-            alert('deactivating ' + row.getValue('name'));
-          });
-        };
-
-        const handleActivate = () => {
-          table.getSelectedRowModel().flatRows.map((row) => {
-            alert('activating ' + row.getValue('name'));
-          });
-        };
-
-        const handleContact = () => {
-          table.getSelectedRowModel().flatRows.map((row) => {
-            alert('contact ' + row.getValue('name'));
-          });
-        };
-
-        return (
+    <>
+      <MaterialReactTable
+        columns={columns}
+        data={data}
+        enableColumnFilterModes
+        enableColumnOrdering
+        enableGrouping
+        enableColumnPinning
+        enableRowActions
+        enableRowSelection
+        initialState={{ showColumnFilters: true }}
+        positionToolbarAlertBanner="bottom"
+        renderDetailPanel={({ row }) => (
           <Box
-            sx={(theme) => ({
-              backgroundColor: lighten(theme.palette.background.default, 0.05),
-              display: 'flex',
-              gap: '0.5rem',
-              p: '8px',
-              justifyContent: 'space-between',
-            })}
+            sx={{
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
           >
-            <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              {/* import MRT sub-components */}
-              <MRT_GlobalFilterTextField table={table} />
-              <MRT_ToggleFiltersButton table={table} />
+            <img
+              alt="avatar"
+              height={200}
+              src={row.original.avatar}
+              loading="lazy"
+              style={{ borderRadius: "50%" }}
+            />
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="h4">Signature Catch Phrase:</Typography>
+              <Typography variant="h1">
+                &quot;{row.original.signatureCatchPhrase}&quot;
+              </Typography>
             </Box>
-            <Box>
-              <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                <Button
-                  color="error"
-                  disabled={!table.getIsSomeRowsSelected()}
-                  onClick={handleDeactivate}
-                  variant="contained"
-                >
-                  Deactivate
-                </Button>
-                <Button
-                  color="success"
-                  disabled={!table.getIsSomeRowsSelected()}
-                  onClick={handleActivate}
-                  variant="contained"
-                >
-                  Activate
-                </Button>
-                <Button
-                  color="info"
-                  disabled={!table.getIsSomeRowsSelected()}
-                  onClick={handleContact}
-                  variant="contained"
-                >
-                  Contact
-                </Button>
+          </Box>
+        )}
+        renderRowActionMenuItems={({ closeMenu }) => [
+          <MenuItem
+            key={0}
+            onClick={() => {
+              // View profile logic...
+              closeMenu();
+            }}
+            sx={{ m: 0 }}
+          >
+            <ListItemIcon>
+              <AccountCircle />
+            </ListItemIcon>
+            View Profile
+          </MenuItem>,
+          <MenuItem
+            key={1}
+            onClick={() => {
+              // Send email logic...
+              closeMenu();
+            }}
+            sx={{ m: 0 }}
+          >
+            <ListItemIcon>
+              <Send />
+            </ListItemIcon>
+            Send Email
+          </MenuItem>,
+        ]}
+        renderTopToolbar={({ table }) => {
+          const handleDeactivate = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              alert("deactivating " + row.getValue("name"));
+            });
+          };
+
+          const handleActivate = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              alert("activating " + row.getValue("name"));
+            });
+          };
+
+          const handleContact = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              alert("contact " + row.getValue("name"));
+            });
+          };
+
+          return (
+            <Box
+              sx={(theme) => ({
+                backgroundColor: lighten(
+                  theme.palette.background.default,
+                  0.05,
+                ),
+                display: "flex",
+                gap: "0.5rem",
+                p: "8px",
+                justifyContent: "space-between",
+              })}
+            >
+              <Box
+                sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
+                {/* import MRT sub-components */}
+                <MRT_GlobalFilterTextField table={table} />
+                <MRT_ToggleFiltersButton table={table} />
+              </Box>
+              <Box>
+                <Box sx={{ display: "flex", gap: "0.5rem" }}>
+                  <Button
+                    color="error"
+                    disabled={!table.getIsSomeRowsSelected()}
+                    onClick={handleDeactivate}
+                    variant="contained"
+                  >
+                    Deactivate
+                  </Button>
+                  <Button
+                    color="success"
+                    disabled={!table.getIsSomeRowsSelected()}
+                    onClick={handleActivate}
+                    variant="contained"
+                  >
+                    Activate
+                  </Button>
+                  <Button
+                    color="info"
+                    disabled={!table.getIsSomeRowsSelected()}
+                    onClick={handleContact}
+                    variant="contained"
+                  >
+                    Contact
+                  </Button>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        );
-      }}
-    />
+          );
+        }}
+      />
+    </>
   );
 };
 
 //Date Picker Imports - these should just be in your Context Provider
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 const ExampleWithLocalizationProvider = () => (
   //App.tsx or AppProviders file
